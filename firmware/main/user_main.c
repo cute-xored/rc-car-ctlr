@@ -1,8 +1,3 @@
-#include <stdlib.h>
-#include <string.h>
-#include <arpa/inet.h>
-#include <sys/socket.h>
-
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 #include "freertos/event_groups.h"
@@ -17,10 +12,10 @@
 #include "lwip/ip_addr.h"
 
 #include "config.h"
+#include "logging.h"
+#include "ap_server.h"
 #include "wifi.h"
 
-static const char* WIFI_AP_TAG = "WIFI_AP";
-static const char* AP_SERVER_TAG = "AP_SERVER";
 
 static esp_err_t event_handler(void *ctx, system_event_t *event) {
     switch(event->event_id) {
@@ -37,86 +32,6 @@ static esp_err_t event_handler(void *ctx, system_event_t *event) {
         break;
     }
     return ESP_OK;
-}
-
-static void ap_server_task(void* _) {
-    struct sockaddr_in addr;
-    memset(&addr, 0, sizeof(addr));
-
-    addr.sin_family = AF_INET;
-    inet_pton(AF_INET, "192.168.91.1", &(addr.sin_addr));
-    addr.sin_port = htons(AP_SERVER_PORT);
-
-    socklen_t addr_len;
-    int socket_fd = socket(AF_INET, SOCK_STREAM, 0);
-    if (socket_fd < 0) {
-        ESP_LOGE(
-            AP_SERVER_TAG,
-            "Failed to create socket"
-        );
-
-        return;
-    }
-
-    int ret = bind(socket_fd, (struct sockaddr*)&addr, sizeof(addr));
-
-    if (ret) {
-        ESP_LOGE(
-            AP_SERVER_TAG,
-            "Cannot bind socket: %d",
-            ret
-        );
-
-        return;
-    }
-
-    ret = listen(socket_fd, 32);
-    if (ret) {
-        ESP_LOGE(
-            AP_SERVER_TAG,
-            "Cannot listen socket: %d",
-            ret
-        );
-
-        return;
-    }
-
-    char str[INET_ADDRSTRLEN];
-    inet_ntop(AF_INET, &(addr.sin_addr), str, INET_ADDRSTRLEN);
-
-    ESP_LOGI(
-        AP_SERVER_TAG,
-        "Listen to %s:%d",
-        str,
-        addr.sin_port
-    );
-
-    // There is only live connection is possible, it's ok for now,
-    // also that's why we don't need to synchronize this interaction
-    while(true) {
-        ESP_LOGI(
-            AP_SERVER_TAG,
-            "Waiting for the client..."
-        );
-
-        int client_sock_fd = accept(socket_fd, (struct sockaddr*)&addr, &addr_len);
-        if (client_sock_fd < 0) {
-            ESP_LOGE(
-                AP_SERVER_TAG,
-                "Failed to accept"
-            );
-
-            continue;
-        }
-
-        ESP_LOGI(
-            AP_SERVER_TAG,
-            "Connect accepted, closing connection..."
-        );
-        close(client_sock_fd);
-    }
-
-    return;
 }
 
 void app_main()
