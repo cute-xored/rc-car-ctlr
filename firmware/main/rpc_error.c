@@ -4,26 +4,8 @@
 
 #include "cJSON.h"
 
+#include "cjson_helper.h"
 
-// No need to check errors since we control all the data
-cJSON* construct_error(int code, const char* message, int id) {
-    cJSON* ret = cJSON_CreateObject();
-    cJSON* error = cJSON_CreateObject();
-
-    cJSON_AddNumberToObject(error, "code", code);
-    cJSON_AddStringToObject(error, "message", message);
-
-    if (id >= 0) {
-        cJSON_AddNumberToObject(ret, "id", id);
-    } else {
-        cJSON_AddNullToObject(ret, "id");
-    }
-    
-    cJSON_AddStringToObject(ret, "jsonrpc", "2.0");
-    cJSON_AddItemToObject(ret, "error", error);
-
-    return ret;
-}
 
 static char* concat(const char* a, const char* b) {
     const size_t a_len = strlen(a);
@@ -41,13 +23,13 @@ cJSON* parse_error(const char* details) {
     const int code = -32700;
     char* error = concat("Parse error: ", details);
 
-    cJSON* ret = construct_error(code, error, -1);
+    cJSON* ret = construct_error(code, error, NULL);
     
     os_free(error);
     return ret;
 }
 
-cJSON* invalid_request(const char* details, int id) {
+cJSON* invalid_request(const char* details, const char* id) {
     const int code = -32600;
     char* error = concat("Invalid request: ", details);
 
@@ -57,6 +39,6 @@ cJSON* invalid_request(const char* details, int id) {
     return ret;
 }
 
-cJSON* method_not_found(int id) {
+cJSON* method_not_found(const char* id) {
     return construct_error(-32601, "Method not found", id);
 }

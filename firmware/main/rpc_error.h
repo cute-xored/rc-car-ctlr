@@ -3,9 +3,8 @@
 
 #include "cJSON.h"
 
-cJSON* construct_error(int code, const char* message, int id);
 cJSON* parse_error(const char* details);
-cJSON* invalid_request(const char* details, int id);
-cJSON* method_not_found(int id);
+cJSON* invalid_request(const char* details, const char* id);
+cJSON* method_not_found(const char* id);
 
 #endif
