@@ -7,6 +7,9 @@
 #include "cjson_helper.h"
 
 
+static const int WIFI_ERROR_CODE = -32001;
+
+
 static char* concat(const char* a, const char* b) {
     const size_t a_len = strlen(a);
     const size_t b_len = strlen(b);
@@ -41,4 +44,13 @@ cJSON* invalid_request(const char* details, const char* id) {
 
 cJSON* method_not_found(const char* id) {
     return construct_error(-32601, "Method not found", id);
+}
+
+cJSON* wifi_error(const char* details, const char* id) {
+    char* error = concat("Wifi error: ", details);
+
+    cJSON* ret = construct_error(WIFI_ERROR_CODE, error, id);
+
+    os_free(error);
+    return ret;
 }

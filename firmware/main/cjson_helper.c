@@ -40,3 +40,9 @@ cJSON* construct_error(int code, const char* message, const char* id) {
     return ret;
 }
 
+cJSON* construct_empty_resp(const char* id) {
+    cJSON* obj = constuct_base_obj(id);
+    cJSON_AddNullToObject(obj, "result");
+
+    return obj;
+}
