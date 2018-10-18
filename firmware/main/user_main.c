@@ -26,7 +26,13 @@ static esp_err_t event_handler(void *ctx, system_event_t *event) {
             MAC2STR(event->event_info.sta_connected.mac),
             event->event_info.sta_connected.aid
         );
-
+        break;
+    case SYSTEM_EVENT_STA_CONNECTED:
+        ESP_LOGI(
+            WIFI_AP_TAG,
+            "STA connected to \"%s\"",
+            event->event_info.connected.ssid
+        );
         break;
     default:
         break;
@@ -34,8 +40,7 @@ static esp_err_t event_handler(void *ctx, system_event_t *event) {
     return ESP_OK;
 }
 
-void app_main()
-{
+void app_main() {
     esp_err_t ret = nvs_flash_init();
     if (ret == ESP_ERR_NVS_NO_FREE_PAGES) {
       ESP_ERROR_CHECK(nvs_flash_erase());

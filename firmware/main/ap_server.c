@@ -6,15 +6,13 @@
 #include <sys/socket.h>
 
 #include "esp_log.h"
+#include "esp_libc.h"
 
 #include "config.h"
 #include "logging.h"
+#include "rpc.h"
 
-static char* recv_message(int socket, size_t* size) {
-    if (size != NULL) {
-        *size = 0;
-    }
-
+static char* recv_message(int socket) {
     const size_t chunk_size = 1 << 10;
     size_t begin = 0;
     char *buffer = (char*) os_malloc(chunk_size * sizeof(char));
@@ -67,10 +65,6 @@ static char* recv_message(int socket, size_t* size) {
         buffer = new_buffer;
     }
 
-    if (size != NULL) {
-        *size = begin + actual_read_size;
-    }
-
     return buffer;
 }
 
@@ -115,20 +109,23 @@ void ap_server_task(void* _) {
 
         ESP_LOGI(AP_SERVER_TAG, "Connect accepted...");
 
-        size_t size = 0;
-        char* msg = recv_message(client_sock_fd, &size);
+        char* msg = recv_message(client_sock_fd);
         if (msg == NULL) {
             close(client_sock_fd);
             continue;
         }
 
-        int ret = send(client_sock_fd, msg, size, 0);
+        char* res = dispatch(msg);
+        const size_t res_len = strlen(res);
+
+        int ret = send(client_sock_fd, res, res_len, 0);
         if (ret <= 0) {
-            ESP_LOGE(AP_SERVER_TAG, "Failed to send msg back: %s", strerror(errno));
+            ESP_LOGE(AP_SERVER_TAG, "Failed to response: %s", strerror(errno));
         }
 
         ESP_LOGI(AP_SERVER_TAG, "Closing connection...");
 
+        os_free(res);
         os_free(msg);
         close(client_sock_fd);
     }
