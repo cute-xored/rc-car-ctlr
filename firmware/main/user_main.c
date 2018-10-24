@@ -6,6 +6,7 @@
 #include "esp_wifi.h"
 #include "esp_event_loop.h"
 #include "esp_log.h"
+#include "esp_err.h"
 
 #include "nvs_flash.h"
 
@@ -23,6 +24,7 @@ static TaskHandle_t ctrl_task_handle;
 
 static esp_err_t event_handler(void *ctx, system_event_t *event) {
     connection_state_t state;
+    esp_err_t err;
     
     switch(event->event_id) {
     case SYSTEM_EVENT_AP_STACONNECTED:
@@ -34,6 +36,13 @@ static esp_err_t event_handler(void *ctx, system_event_t *event) {
         );
         break;
     case SYSTEM_EVENT_STA_CONNECTED:
+        state = CONNECTED;
+        update_sta_state(
+            NULL,
+            NULL,
+            NULL,
+            NULL,
+            &state);
         ESP_LOGI(
             WIFI_STA_TAG,
             "Сonnected to \"%s\"",
@@ -48,7 +57,12 @@ static esp_err_t event_handler(void *ctx, system_event_t *event) {
             NULL,
             NULL,
             &state);
-        ESP_LOGI(WIFI_STA_TAG, "Disconnected");
+        ESP_LOGI(WIFI_STA_TAG, "Disconnected. Reconnecting...");
+
+        err = esp_wifi_connect();
+        if (err != ESP_OK) {
+            ESP_LOGE(WIFI_STA_TAG, "Failed to connect to AP");
+        }
         break;
     case SYSTEM_EVENT_STA_GOT_IP:
         state = CONNECTED;
@@ -71,6 +85,11 @@ static esp_err_t event_handler(void *ctx, system_event_t *event) {
             &state);
 
         ESP_LOGI(WIFI_STA_TAG, "Lost IP");
+
+        err = esp_wifi_disconnect();
+        if (err != ESP_OK) {
+            ESP_LOGE(WIFI_STA_TAG, "Failed to disconnect from AP");
+        }
         break;
     default:
         break;
