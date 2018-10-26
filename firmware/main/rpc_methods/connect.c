@@ -29,8 +29,8 @@ cJSON* connect(const cJSON* params, const char* id) {
 
     wifi_sta_config_t sta_config;
 
-    memcpy(sta_config.ssid, ssid, 32 * sizeof(char));
-    memcpy(sta_config.password, pass, 64 * sizeof(char));
+    strncpy((char*) sta_config.ssid, ssid, 32 * sizeof(char));
+    strncpy((char*) sta_config.password, pass, 64 * sizeof(char));
 
     wifi_config_t wifi_config = {
         .sta = sta_config
