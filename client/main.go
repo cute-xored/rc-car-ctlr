@@ -1,6 +1,7 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"net"
 	"runtime"
@@ -13,8 +14,10 @@ func init() {
 	runtime.LockOSThread()
 }
 
-func socketRoutine(inC chan []byte) {
-	serverAddr, err := net.ResolveUDPAddr("udp", "192.168.31.66:359") // It's temporary hardcoded
+var addrFlag = flag.String("addr", "", "RC car control socket address ip:port")
+
+func socketRoutine(addr string, inC chan []byte) {
+	serverAddr, err := net.ResolveUDPAddr("udp", addr)
 	if err != nil {
 		panic(err)
 	}
@@ -166,28 +169,33 @@ func inputRoutine(tickC <-chan time.Time, keyActionC chan keyAction, controlC ch
 				pressed.d = isPressed
 			default:
 			}
-		default:
 		}
 	}
 }
 
 func getKeyHandler(keyActionC chan keyAction) glfw.KeyCallback {
 	return func(w *glfw.Window, key glfw.Key, _ int, action glfw.Action, _ glfw.ModifierKey) {
+		ac := keyAction{key: key, action: action}
 		switch key {
 		case glfw.KeyW:
-			keyActionC <- keyAction{key: glfw.KeyW, action: action}
+			fallthrough
 		case glfw.KeyS:
-			keyActionC <- keyAction{key: glfw.KeyS, action: action}
+			fallthrough
 		case glfw.KeyA:
-			keyActionC <- keyAction{key: glfw.KeyA, action: action}
+			fallthrough
 		case glfw.KeyD:
-			keyActionC <- keyAction{key: glfw.KeyD, action: action}
+			keyActionC <- ac
 		default:
 		}
 	}
 }
 
 func main() {
+	flag.Parse()
+	if *addrFlag == "" {
+		panic("-addr flag is mandatory")
+	}
+
 	err := glfw.Init()
 	if err != nil {
 		panic(err)
@@ -205,14 +213,14 @@ func main() {
 	actionC := make(chan keyAction)
 	inC := make(chan []byte)
 
-	go socketRoutine(inC)
+	go socketRoutine(*addrFlag, inC)
 	go inputRoutine(tickC, actionC, inC)
 
 	window.MakeContextCurrent()
+	window.SetKeyCallback(getKeyHandler(actionC))
 
 	for !window.ShouldClose() {
-		window.SetKeyCallback(getKeyHandler(actionC))
 		window.SwapBuffers()
-		glfw.PollEvents()
+		glfw.WaitEvents()
 	}
 }
