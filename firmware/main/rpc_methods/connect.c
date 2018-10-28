@@ -27,7 +27,9 @@ cJSON* connect(const cJSON* params, const char* id) {
         pass = param_pass;
     }
 
-    wifi_sta_config_t sta_config;
+    wifi_sta_config_t sta_config = {
+    	.scan_method = WIFI_ALL_CHANNEL_SCAN
+    };
 
     strncpy((char*) sta_config.ssid, ssid, 32 * sizeof(char));
     strncpy((char*) sta_config.password, pass, 64 * sizeof(char));
@@ -35,6 +37,8 @@ cJSON* connect(const cJSON* params, const char* id) {
     wifi_config_t wifi_config = {
         .sta = sta_config
     };
+
+    ESP_LOGI(RPC_TAG, "Connecting to: [%s] [%s]", wifi_config.sta.ssid, wifi_config.sta.password);
 
     // Find a way to translate err to something more useful and then get rid of "meh"
     esp_err_t err = esp_wifi_set_config(ESP_IF_WIFI_STA, &wifi_config);
