@@ -3,7 +3,7 @@
 ## Build and flash
 First, you need to get RTOS sources and toolchain for building:
 1. Toolchain: [https://github.com/espressif/ESP8266_RTOS_SDK#get-toolchain](https://github.com/espressif/ESP8266_RTOS_SDK#get-toolchain)
-2. RTOS SDK v3.0: [https://github.com/espressif/ESP8266_RTOS_SDK/tree/release/v3.0](https://github.com/espressif/ESP8266_RTOS_SDK/tree/release/v3.0)
+2. Latest RTOS SDK (or at least [1cf860](https://github.com/espressif/ESP8266_RTOS_SDK/tree/1cf86013736d9cf442b0ea06f2dc76e6fc68160d)): https://github.com/espressif/ESP8266_RTOS_SDK
 3. Additionaly you may need to have `esptool` python library. You can install it with `pip`. Also it's important to use python 2.7, not sure but 3.* didn't work for me.
 
 Second, you have to set up env variables to build project:
