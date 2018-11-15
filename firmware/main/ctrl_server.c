@@ -21,6 +21,8 @@
 #include "logging.h"
 
 
+TaskHandle_t ctrl_task_handle;
+
 #define A_MOTOR_POWER GPIO_NUM_5
 #define B_MOTOR_POWER GPIO_NUM_4
 

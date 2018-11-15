@@ -8,6 +8,10 @@ method_handler_t get_method_handler(const char* method_name) {
         return connect;
     }
 
+    if (strncmp(run_ctrl_name, method_name, strlen(run_ctrl_name)) == 0) {
+        return run_ctrl;
+    }
+
     if (strncmp(get_connection_info_name, method_name, strlen(get_connection_info_name)) == 0) {
         return get_connection_info;
     }
