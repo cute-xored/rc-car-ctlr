@@ -20,8 +20,6 @@
 #include "wifi.h"
 
 
-static TaskHandle_t ctrl_task_handle;
-
 static esp_err_t event_handler(void *ctx, system_event_t *event) {
     connection_state_t state;
     esp_err_t err;
@@ -38,7 +36,7 @@ static esp_err_t event_handler(void *ctx, system_event_t *event) {
     case SYSTEM_EVENT_STA_CONNECTED:
         state = CONNECTED;
         update_sta_state(
-            NULL,
+            (uint8_t**) &event->event_info.connected.ssid,
             NULL,
             NULL,
             NULL,
@@ -73,7 +71,6 @@ static esp_err_t event_handler(void *ctx, system_event_t *event) {
             (uint32_t*) &event->event_info.got_ip.ip_info.gw,
             &state);
 
-        update_ctrl_config(ctrl_task_handle, *((uint64_t*) &event->event_info.got_ip.ip_info.ip), CTRL_SERVER_PORT);
         break;
     case SYSTEM_EVENT_STA_LOST_IP:
         state = DISCONNECTED;

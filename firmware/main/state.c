@@ -39,8 +39,8 @@ state_t get_state() {
 }
 
 void update_sta_state(
-    const uint8_t** ssid,
-    const uint8_t** pass,
+    const uint8_t* ssid[32],
+    const uint8_t* pass[64],
     const uint32_t* ip,
     const uint32_t* gw,
     const connection_state_t* sta_state

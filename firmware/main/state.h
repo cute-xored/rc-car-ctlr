@@ -4,9 +4,9 @@
 #include <stdint.h>
 
 typedef enum {
-    CONNECTED,
-    RECONNECTING,
-    DISCONNECTED 
+    CONNECTED = 1,
+    RECONNECTING = 2,
+    DISCONNECTED = 0
 } connection_state_t;
 
 typedef struct {
