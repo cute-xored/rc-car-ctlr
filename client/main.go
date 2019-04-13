@@ -14,6 +14,10 @@ func init() {
 	runtime.LockOSThread()
 }
 
+var setupFlag = flag.Bool("setup", false, "Flag indiicates STA setup is needed")
+var ssidFlag = flag.String("ssid", "", "Target SSID")
+var passFlag = flag.String("pass", "", "Target Password")
+
 var addrFlag = flag.String("addr", "", "RC car control socket address ip:port")
 
 func socketRoutine(addr string, inC chan []byte) {
@@ -52,7 +56,7 @@ type keyAction struct {
 }
 
 func inputRoutine(tickC <-chan time.Time, keyActionC chan keyAction, controlC chan []byte) {
-	const wheelAcc = 16
+	const wheelAcc = 64
 	const engineAcc = 16
 
 	maxValue := 255
@@ -190,9 +194,15 @@ func getKeyHandler(keyActionC chan keyAction) glfw.KeyCallback {
 	}
 }
 
+type StaConfig struct {
+	ip    uint32 `json:"ip"`
+	state uint32 `json:"state"`
+	ssid  string `json:"ssid"`
+}
+
 func main() {
 	flag.Parse()
-	if *addrFlag == "" {
+	if *addrFlag == "" && *setupFlag == false {
 		panic("-addr flag is mandatory")
 	}
 

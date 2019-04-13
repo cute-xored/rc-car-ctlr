@@ -16,7 +16,7 @@ const cJSON* get_prop(const cJSON* obj, const char* field_name) {
 }
 
 
-cJSON* constuct_base_obj(const char* id) {
+cJSON* construct_base_obj(const char* id) {
     cJSON* obj = cJSON_CreateObject();
     cJSON_AddStringToObject(obj, "jsonrpc", "2.0");
     if (id != NULL) {
@@ -34,14 +34,14 @@ cJSON* construct_error(int code, const char* message, const char* id) {
     cJSON_AddNumberToObject(error, "code", code);
     cJSON_AddStringToObject(error, "message", message);
 
-    cJSON* ret = constuct_base_obj(id);
+    cJSON* ret = construct_base_obj(id);
     cJSON_AddItemToObject(ret, "error", error);
 
     return ret;
 }
 
 cJSON* construct_empty_resp(const char* id) {
-    cJSON* obj = constuct_base_obj(id);
+    cJSON* obj = construct_base_obj(id);
     cJSON_AddNullToObject(obj, "result");
 
     return obj;

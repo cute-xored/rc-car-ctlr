@@ -38,7 +38,7 @@ static esp_err_t event_handler(void *ctx, system_event_t *event) {
     case SYSTEM_EVENT_STA_CONNECTED:
         state = CONNECTED;
         update_sta_state(
-            NULL,
+            &event->event_info.connected.ssid,
             NULL,
             NULL,
             NULL,
